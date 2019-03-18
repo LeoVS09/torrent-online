@@ -1,46 +1,38 @@
 <template>
-  <div class="home">
-    <div class="video-wrapper">
-      <!-- <video autoplay controls preload="auto"></video> -->
+    <div class="home">
+        <input type="text" v-model="magnetUrl" placeholder="Input magnet url">
+        <button @click="handleDownloadClick">Download</button>
+        <div class="video-wrapper">
+            <!--<video autoplay controls preload="auto"></video> -->
+        </div>
     </div>
-  </div>
 </template>
 
 <script lang="ts">
-import HelloWorld from '@/components/HelloWorld.vue' 
-import { Component, Vue } from 'vue-property-decorator'
-import {addTorrent} from '../torrents'
-import WebTorrent from 'webtorrent'
+    import HelloWorld from '@/components/HelloWorld.vue'
+    import {NewTorrentSources} from '@/store/actions'
+    import {Component, Vue} from 'vue-property-decorator'
+    import {Getter, Action} from 'vuex-class'
+    import WebTorrent from 'webtorrent'
+    import {Actions} from '../store/types'
 
-@Component({
-  components: {
-    HelloWorld,
-  },
-})
-export default class Home extends Vue {
-  
-  public mounted() {
-    addTorrent()
-    .then((torrent: WebTorrent.Torrent) => {
-        // Torrents can contain many files. Let's use the .mp4 file
-        const video = torrent.files.find(file => {
-          console.log('torrent file', file.name)
-          return file.name.endsWith('.mp4')
-        })
-  
-        if (!video) {
-          console.error('Not find file')
-          return
-        }
-
-        video.appendTo('.video-wrapper', {
-          // @ts-ignore
-          autoplay: true,
-          mounted: true
-        })
-
-        
+    @Component({
+        components: {
+            HelloWorld,
+        },
     })
-  }
-}
+    export default class Home extends Vue {
+
+        magnetUrl: string = ''
+
+        @Action(Actions.SET_NEW_TORRENT)
+        // @ts-ignore
+        setNewTorrent: (sources: NewTorrentSources) => Promise<WebTorrent.Torrent>
+
+        handleDownloadClick() {
+
+            this.setNewTorrent({magnetUrl: this.magnetUrl})
+
+        }
+    }
 </script>
